@@ -4,6 +4,7 @@ package skpsilk
 
 import (
 	"errors"
+
 	"math"
 )
 
@@ -31,7 +32,7 @@ func evalPoly(p *[]int32, x int32, dd int) int32 {
 	y32 := (*p)[dd]
 	x_Q16 := x << 4
 	for n := dd - 1; n >= 0; n-- {
-		y32 = (*p)[n] + ((y32 * x_Q16) >> 16)
+		y32 = SMLAWW((*p)[n], y32, x_Q16)
 	}
 	return y32
 }
@@ -117,7 +118,7 @@ func A2NLSF(NLSF []int, a_Q16 []int32, d int) {
 
 			for m := 0; m < BIN_DIV_STEPA_A2NLSF_FIX; m++ {
 				/* Evaluate polynomial */
-				xmid = (((xlo + xhi) >> 1) + ((xlo + xhi) & 1)) >> 1
+				xmid = RSHIFT_ROUND(xlo+xhi, 1)
 				ymid = evalPoly(p, xmid, dd)
 
 				/* Detect zero crossing */
@@ -189,7 +190,7 @@ func A2NLSF(NLSF []int, a_Q16 []int32, d int) {
 					/* Set NLSFs to white spectrum and exit */
 					NLSF[0] = int(int32((1 << 15) / (d + 1)))
 					for k = 1; k < d; k++ {
-						NLSF[k] = int(int32(int16(k+1)) * int32(int16(NLSF[0])))
+						NLSF[k] = int(SMULBB(int32(k+1), int32(NLSF[0])))
 					}
 					return
 				}
