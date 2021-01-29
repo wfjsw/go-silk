@@ -14,9 +14,10 @@ func CLZ64(in int64) int32 {
 }
 
 /* get number of leading zeros and fractional part (the bits right after the leading one */
-func CLZ_FRAC(in int32) (lz int32, frac_Q7 int32) {
+func CLZ_FRAC(in int32, lz *int32, frac_Q7 *int32) {
 	lzeros := CLZ32(in)
-	return lzeros, ROR32(in, int(24-lzeros)) & 0x7f
+	*lz = lzeros
+	*frac_Q7 = ROR32(in, 24-int(lzeros)) & 0x7f
 }
 
 /* Approximation of square root                                          */
